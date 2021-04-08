@@ -1,13 +1,19 @@
 import { Request, Response } from 'express';
 import { IProductRepository } from '../infrastructure/repository/product/iproduct.repository';
 import { Product } from '../model/Product';
+import { ApiExceptionManager } from '../utils/api.exception.manager';
 
 export class ProductController {
   constructor(private productRepository: IProductRepository) {}
 
   async getProducts(request: Request, response: Response): Promise<Response> {
-    const products = await this.productRepository.getProducts();
-    return response.status(200).json(products);
+    try {
+      const products = await this.productRepository.getProducts();
+      return response.status(200).json(products);
+    } catch(error) {
+      const handleError = ApiExceptionManager.build(error);
+      response.status(handleError.code).json(handleError.toJSON());
+    }
   }
 
   async getProductById(request: Request, response: Response): Promise<Response> {
@@ -15,14 +21,11 @@ export class ProductController {
     let product;
     try {
       product = await this.productRepository.getProductById(id);
+      return response.status(200).json(product);
     } catch(error) {
-      if(error.message === "Formato de Id inválido.") {
-        return response.status(400).send(error.message);
-      } else if(error.message === "Produto não cadastrado.") {
-        return response.status(404).send(error.message);
-      }
+      const handleError = ApiExceptionManager.build(error);
+      return response.status(handleError.code).send(handleError.toJSON());
     }
-    return response.status(200).json(product);
   }
 
   async createProduct(request: Request, response: Response): Promise<Response> {
@@ -44,8 +47,15 @@ export class ProductController {
         invoice_image_url,
         comment
       );
-      await this.productRepository.createProduct(product);
-      return response.status(200).send("Produto cadastrado com sucesso.");
+
+      try {
+        await this.productRepository.createProduct(product);
+        return response.status(200).send("Produto cadastrado com sucesso.");
+      } catch (error) {
+        const handleError = ApiExceptionManager.build(error);
+        return response.status(handleError.code).json(handleError.toJSON());
+      }
+      
   }
 
   async deleteProduct(request: Request, response: Response): Promise<Response> {
@@ -53,14 +63,11 @@ export class ProductController {
 
     try {
       await this.productRepository.deleteProduct(id);
+      return response.status(200).send("Produto removido com sucesso.")
     } catch (error) {
-      if(error.message === "Formato de Id inválido.") {
-        return response.status(400).send(error.message);
-      } else if(error.message === "Produto não cadastrado.") {
-        return response.status(404).send(error.message);
-      }
+      const handleError = ApiExceptionManager.build(error);
+      response.status(handleError.code).json(handleError.toJSON());
     }
-    return response.status(200).send("Produto removido com sucesso.")
   }
 
   async updateProduct(request: Request, response: Response): Promise<Response> {
@@ -87,13 +94,10 @@ export class ProductController {
 
     try {
       await this.productRepository.updateProduct(product);
+      return response.status(200).send("Produto atualizado com sucesso.");
     } catch (error) {
-      if(error.message === "Formato de Id inválido.") {
-        return response.status(400).send(error.message);
-      } else if(error.message === "Produto não cadastrado.") {
-        return response.status(404).send(error.message);
-      }
+      const handleError = ApiExceptionManager.build(error);
+      response.status(handleError.code).json(handleError.toJSON());
     }
-    return response.status(200).send("Produto atualizado com sucesso.");
   }
 }

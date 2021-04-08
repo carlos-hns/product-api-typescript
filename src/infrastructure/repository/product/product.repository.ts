@@ -1,5 +1,8 @@
 import { Types } from "mongoose";
+import { throws } from "node:assert";
 import { Product } from "../../../model/Product";
+import { InvalidParametherException } from "../../../utils/InvalidParametherException";
+import { ProductNotFoundException } from "../../../utils/ProductNotFoundException";
 import { ProductModel } from "../../database/schema/product.schema";
 import { ProductMapper } from "../../mapper/product.mapper";
 import { IProductRepository } from "./iproduct.repository";
@@ -8,6 +11,7 @@ export class ProductRepository implements IProductRepository {
   async getProducts(): Promise<Product[]> {    
     let productsMongoObject = await ProductModel.find({}).exec();
     let products = productsMongoObject.map((product) => ProductMapper.mapProductModelToProduct(product));
+    if(products.length == 0) throw new ProductNotFoundException("Não existem produtos cadastrados.");
     return products;
   }
 
@@ -16,10 +20,10 @@ export class ProductRepository implements IProductRepository {
     try {
       productMongoObject = await ProductModel.findById(Types.ObjectId(id)).exec();
     } catch (error) {
-      throw new Error("Formato de Id inválido.");
+      throw new InvalidParametherException("Formato de Id inválido.");
     }
     let product = ProductMapper.mapProductModelToProduct(productMongoObject);
-    if(product?.["id"] === undefined) throw new Error("Produto não cadastrado.");
+    if(product?.["id"] === undefined) throw new ProductNotFoundException("Produto não cadastrado.");
 
     return product;
   }
@@ -34,7 +38,14 @@ export class ProductRepository implements IProductRepository {
       invoice_image_url: product.invoice_image_url,
       comment: product.comment
     });
-    mongoProduct.save();
+
+    (await mongoProduct.save()).execPopulate();
+
+    try {
+      await this.getProductById(mongoProduct._id.toString());
+    } catch(error) {
+      throw error;
+    }
   }
 
   async updateProduct(product: Product): Promise<void> {
