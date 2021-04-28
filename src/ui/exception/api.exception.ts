@@ -1,4 +1,4 @@
-import { Exception } from "./exception";
+import { Exception } from "../../application/domain/exception/expection";
 
 export class ApiException extends Exception {
   public code: number;

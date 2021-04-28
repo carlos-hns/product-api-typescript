@@ -1,4 +1,4 @@
-import { Exception } from './exception';
+import { Exception } from "./expection";
 
 export class InvalidParametherException extends Exception {
   constructor(message: string, description?: string) {

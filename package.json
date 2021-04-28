@@ -12,7 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "mongoose": "^5.12.3"
+    "mongoose": "^5.12.3",
+    "query-strings-parser": "^2.1.7"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",

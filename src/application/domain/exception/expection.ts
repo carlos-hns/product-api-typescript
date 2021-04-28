@@ -1,3 +1,6 @@
+// Cria a classe generica que todas as exceções
+// devem herdar.
+
 export abstract class Exception extends Error {
   public description?: string;
 

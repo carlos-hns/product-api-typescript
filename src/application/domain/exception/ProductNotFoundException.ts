@@ -1,4 +1,4 @@
-import { Exception } from "./exception";
+import { Exception } from './expection';
 
 export class ProductNotFoundException extends Exception {
   constructor(message: string, description?: string) {
