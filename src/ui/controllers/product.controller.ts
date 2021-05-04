@@ -4,7 +4,11 @@ import { Product } from "../../application/domain/model/product";
 import { IProductService } from "../../application/port/product.service.interface";
 import { IQuery } from "../../application/port/query.interface";
 import { ApiExceptionManager } from "../exception/api.exception.manager";
+import { inject } from "inversify";
+import { Identifier } from "../../di/identifiers";
+import { controller, httpGet, httpPost, httpDelete, httpPatch ,request, response } from "inversify-express-utils";
 
+@controller("/products")
 export class ProductController {
 
   private readonly CREATED = 201;
@@ -12,10 +16,11 @@ export class ProductController {
   private readonly NO_CONTENT = 204;
 
   constructor(
-    private readonly _productService: IProductService
+    @inject(Identifier.PRODUCT_SERVICE) private readonly _productService: IProductService
   ) {}
 
-  public async addProduct(request: Request, response: Response): Promise<Response> {
+  @httpPost("/")
+  public async addProduct(@request() request: Request, @response() response: Response): Promise<Response> {
     try {
       const product: Product = new Product().fromJSON({...request.body});
       const result: Product | undefined = await this._productService.add(product);
@@ -26,7 +31,8 @@ export class ProductController {
     }
   }
 
-  public async getProducts(request: Request, response: Response): Promise<Response> {
+  @httpGet("/")
+  public async getProducts(@request() request: Request, @response() response: Response): Promise<Response> {
     try {
       const query: IQuery = new Query().fromJSON(request.query);
       const result: Array<Product> = await this._productService.getAll(query);
@@ -39,7 +45,8 @@ export class ProductController {
     }
   }
 
-  public async getProductById(request: Request, response: Response): Promise<Response> {
+  @httpGet("/:product_id")
+  public async getProductById(@request() request: Request, @response() response: Response): Promise<Response> {
     try {
       const result: Product | undefined = 
         await this._productService.getById(
@@ -55,7 +62,8 @@ export class ProductController {
     }
   }
 
-  public async deleteProduct(request: Request, response: Response): Promise<Response> {
+  @httpDelete("/:product_id")
+  public async deleteProduct(@request() request: Request, @response() response: Response): Promise<Response> {
     try {
       await this._productService.remove(request.params.product_id);
       return response.status(this.NO_CONTENT).send();
@@ -65,7 +73,8 @@ export class ProductController {
     }
   }
 
-  public async updateProduct(request: Request, response: Response): Promise<Response> {
+  @httpPatch("/:product_id")
+  public async updateProduct(@request() request: Request, @response() response: Response): Promise<Response> {
     try {
       const product: Product = new Product().fromJSON({...request.body, id: request.params.product_id});
       const result = await this._productService.update(product);

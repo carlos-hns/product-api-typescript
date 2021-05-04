@@ -5,10 +5,15 @@ import { IProductService } from "../port/product.service.interface";
 import { IQuery } from "../port/query.interface";
 import { UpdateProductValidator } from "../domain/validator/product/update.product.validator";
 import { ProductNotFoundException } from "../domain/exception/ProductNotFoundException";
+import { inject, injectable } from "inversify";
+import { Identifier } from "../../di/identifiers";
 
+@injectable()
 export class ProductService implements IProductService {
   
-  constructor(private readonly _productRepository: IProductRepository) {}
+  constructor(
+    @inject(Identifier.PRODUCT_REPOSITORY) private readonly _productRepository: IProductRepository
+  ) {}
 
   public async add(item: Product): Promise<Product> | undefined {
     try {

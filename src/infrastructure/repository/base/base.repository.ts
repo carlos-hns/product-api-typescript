@@ -1,3 +1,4 @@
+import { injectable } from "inversify"
 import { ConflictException } from "../../../application/domain/exception/conflitct.exception"
 import { RepositoryException } from "../../../application/domain/exception/repository.exception"
 import { ValidationException } from "../../../application/domain/exception/validation.exception"
@@ -7,6 +8,7 @@ import { IRepository } from "../../../application/port/repository.interface"
 import { Strings } from "../../../utils/strings"
 import { IEntityMapper } from "../../port/entity.mapper.interface"
 
+@injectable()
 export abstract class BaseRepository<T extends Entity, TModel> implements IRepository<T> {
 
   protected constructor(
@@ -18,7 +20,6 @@ export abstract class BaseRepository<T extends Entity, TModel> implements IRepos
   public create(item: T): Promise<T | undefined> {
       const itemNew: TModel = this.mapper.transform(item)
       return new Promise<T | undefined>((resolve, reject) => {
-          console.log("Teste: " + typeof this.Model.create)
           this.Model.create(itemNew)
               .then((result) => {
                   if (!result) return resolve(undefined)

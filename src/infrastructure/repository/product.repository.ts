@@ -1,16 +1,18 @@
-import { Query } from './query/query';
 import { Product } from "../../application/domain/model/product";
 import { IProductRepository } from "../../application/port/product.repository.interface";
 import { IQuery } from "../../application/port/query.interface";
 import { ProductEntity } from "../entity/product.entity";
 import { IEntityMapper } from "../port/entity.mapper.interface";
 import { BaseRepository } from "./base/base.repository";
+import { inject, injectable } from 'inversify';
+import { Identifier } from "../../di/identifiers";
 
+@injectable()
 export class ProductRepository extends BaseRepository<Product, ProductEntity> implements IProductRepository {
   
   constructor(
-    readonly _model: any,
-    readonly _mapper: IEntityMapper<Product, ProductEntity>
+    @inject(Identifier.PRODUCT_MODEL) readonly _model: any,
+    @inject(Identifier.PRODUCT_ENTITY_MAPPER) readonly _mapper: IEntityMapper<Product, ProductEntity>
   ) {
     super(_model, _mapper)
   }
